@@ -26,19 +26,19 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: validate-readOnlyRootFilesystem
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "Root filesystem must be read-only."
-      pattern:
-        spec:
-          containers:
-          - securityContext:
-              readOnlyRootFilesystem: true
+    - name: validate-readOnlyRootFilesystem
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Root filesystem must be read-only."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  readOnlyRootFilesystem: true
 {{- end }}
 {{- end }}
 {{- end }}

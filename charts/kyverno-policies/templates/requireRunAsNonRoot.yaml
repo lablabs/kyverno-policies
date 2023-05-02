@@ -28,9 +28,9 @@ spec:
     - name: run-as-non-root
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Running as root is not allowed. Either the field spec.securityContext.runAsNonRoot
@@ -38,28 +38,28 @@ spec:
           spec.initContainers[*].securityContext.runAsNonRoot, and spec.ephemeralContainers[*].securityContext.runAsNonRoot
           must be set to `true`.
         anyPattern:
-        - spec:
-            securityContext:
-              runAsNonRoot: "true"
-            =(ephemeralContainers):
-            - =(securityContext):
-                =(runAsNonRoot): "true"
-            =(initContainers):
-            - =(securityContext):
-                =(runAsNonRoot): "true"
-            containers:
-            - =(securityContext):
-                =(runAsNonRoot): "true"
-        - spec:
-            =(ephemeralContainers):
-            - securityContext:
+          - spec:
+              securityContext:
                 runAsNonRoot: "true"
-            =(initContainers):
-            - securityContext:
-                runAsNonRoot: "true"
-            containers:
-            - securityContext:
-                runAsNonRoot: "true"
+              =(ephemeralContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+              =(initContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+              containers:
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+          - spec:
+              =(ephemeralContainers):
+                - securityContext:
+                    runAsNonRoot: "true"
+              =(initContainers):
+                - securityContext:
+                    runAsNonRoot: "true"
+              containers:
+                - securityContext:
+                    runAsNonRoot: "true"
 {{- end }}
 {{- end }}
 {{- end }}

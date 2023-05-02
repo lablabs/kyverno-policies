@@ -26,31 +26,31 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: validate-namespace
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "Using 'default' namespace is not allowed."
-      pattern:
-        metadata:
-          namespace: "!default"
-  - name: validate-podcontroller-namespace
-    match:
-      any:
-      - resources:
-          kinds:
-          - DaemonSet
-          - Deployment
-          - Job
-          - StatefulSet
-    validate:
-      message: "Using 'default' namespace is not allowed for pod controllers."
-      pattern:
-        metadata:
-          namespace: "!default"
+    - name: validate-namespace
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Using 'default' namespace is not allowed."
+        pattern:
+          metadata:
+            namespace: "!default"
+    - name: validate-podcontroller-namespace
+      match:
+        any:
+          - resources:
+              kinds:
+                - DaemonSet
+                - Deployment
+                - Job
+                - StatefulSet
+      validate:
+        message: "Using 'default' namespace is not allowed for pod controllers."
+        pattern:
+          metadata:
+            namespace: "!default"
 {{- end }}
 {{- end }}
 {{- end }}

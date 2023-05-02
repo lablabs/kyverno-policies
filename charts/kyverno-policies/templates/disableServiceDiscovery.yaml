@@ -26,18 +26,18 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: check-dnspolicy-default
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: 'dnsPolicy should be set to Default and enableServiceLinks should be set to false'
-      pattern:
-        spec:
-          dnsPolicy: Default
-          enableServiceLinks: false
+    - name: check-dnspolicy-default
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: 'dnsPolicy should be set to Default and enableServiceLinks should be set to false'
+        pattern:
+          spec:
+            dnsPolicy: Default
+            enableServiceLinks: false
 {{- end }}
 {{- end }}
 {{- end }}

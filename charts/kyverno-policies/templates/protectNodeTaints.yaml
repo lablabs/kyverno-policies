@@ -29,31 +29,31 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: protect-node-taints
-    match:
-      any:
-      - resources:
-          kinds:
-          - Node
-    exclude:
-      clusterRoles:
-      - cluster-admin
-    preconditions:
-      all:
-      - key: "{{`{{request.operation || 'BACKGROUND'}}`}}"
-        operator: Equals
-        value: UPDATE
-    validate:
-      message: "Node taints may not be altered."
-      deny:
-        conditions:
-          any:
-          - key: "{{`{{request.object.spec.taints}}`}}"
-            operator: NotEquals
-            value: ""
-          - key: "{{`{{request.oldObject.spec.taints}}`}}"
-            operator: NotEquals
-            value: "{{`{{request.object.spec.taints}}`}}"
+    - name: protect-node-taints
+      match:
+        any:
+          - resources:
+              kinds:
+                - Node
+      exclude:
+        clusterRoles:
+          - cluster-admin
+      preconditions:
+        all:
+          - key: "{{`{{request.operation || 'BACKGROUND'}}`}}"
+            operator: Equals
+            value: UPDATE
+      validate:
+        message: "Node taints may not be altered."
+        deny:
+          conditions:
+            any:
+              - key: "{{`{{request.object.spec.taints}}`}}"
+                operator: NotEquals
+                value: ""
+              - key: "{{`{{request.oldObject.spec.taints}}`}}"
+                operator: NotEquals
+                value: "{{`{{request.object.spec.taints}}`}}"
 {{- end }}
 {{- end }}
 {{- end }}

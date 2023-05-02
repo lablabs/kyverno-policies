@@ -27,9 +27,9 @@ spec:
     - name: privilege-escalation
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Privilege escalation is disallowed. The fields
@@ -40,14 +40,14 @@ spec:
         pattern:
           spec:
             =(ephemeralContainers):
-            - securityContext:
-                allowPrivilegeEscalation: "false"
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
             =(initContainers):
-            - securityContext:
-                allowPrivilegeEscalation: "false"
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
             containers:
-            - securityContext:
-                allowPrivilegeEscalation: "false"
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
 {{- end }}
 {{- end }}
 {{- end }}

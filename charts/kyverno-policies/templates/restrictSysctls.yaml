@@ -31,9 +31,9 @@ spec:
     - name: check-sysctls
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Setting additional sysctls above the allowed type is disallowed.

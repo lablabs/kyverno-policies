@@ -25,25 +25,25 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: naked-pods
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    preconditions:
-      all:
-      - key: "{{`{{request.operation || 'BACKGROUND'}}`}}"
-        operator: NotEquals
-        value: DELETE
-    validate:
-      message: "Naked Pods are not allowed. They must be created by Pod controllers."
-      deny:
-        conditions:
-          any:
-          - key: ownerReferences
-            operator: AnyNotIn
-            value: "{{`{{request.object.metadata.keys(@)}}`}}"
+    - name: naked-pods
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      preconditions:
+        all:
+          - key: "{{`{{request.operation || 'BACKGROUND'}}`}}"
+            operator: NotEquals
+            value: DELETE
+      validate:
+        message: "Naked Pods are not allowed. They must be created by Pod controllers."
+        deny:
+          conditions:
+            any:
+              - key: ownerReferences
+                operator: AnyNotIn
+                value: "{{`{{request.object.metadata.keys(@)}}`}}"
 {{- end }}
 {{- end }}
 {{- end }}

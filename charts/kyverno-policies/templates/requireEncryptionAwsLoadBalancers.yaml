@@ -27,20 +27,20 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: aws-loadbalancer-has-ssl-cert
-    match:
-      any:
-      - resources:
-          kinds:
-          - Service
-    validate:
-      message: "Service of type LoadBalancer must carry the annotation service.beta.kubernetes.io/aws-load-balancer-ssl-cert."
-      pattern:
-        metadata:
-          annotations:
-            service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "?*"
-        (spec):
-          (type): LoadBalancer
+    - name: aws-loadbalancer-has-ssl-cert
+      match:
+        any:
+          - resources:
+              kinds:
+                - Service
+      validate:
+        message: "Service of type LoadBalancer must carry the annotation service.beta.kubernetes.io/aws-load-balancer-ssl-cert."
+        pattern:
+          metadata:
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "?*"
+          (spec):
+            (type): LoadBalancer
 {{- end }}
 {{- end }}
 {{- end }}

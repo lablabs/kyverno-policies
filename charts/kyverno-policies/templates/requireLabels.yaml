@@ -26,17 +26,17 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: check-for-labels
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "All labels in .requiredLabels must be set by the Pod."
-      pattern:
-        metadata:
-          labels: {{ toYaml .requiredLabels | nindent 12 }}
+    - name: check-for-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "All labels in .requiredLabels must be set by the Pod."
+        pattern:
+          metadata:
+            labels: {{ toYaml .requiredLabels | nindent 14 }}
 {{- end }}
 {{- end }}
 {{- end }}

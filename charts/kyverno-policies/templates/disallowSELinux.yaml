@@ -27,9 +27,9 @@ spec:
     - name: selinux-type
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Setting the SELinux type is restricted. The fields
@@ -56,9 +56,9 @@ spec:
     - name: selinux-user-role
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Setting the SELinux user or role is forbidden. The fields

@@ -26,18 +26,18 @@ spec:
 {{- if .rulesOverride }}
 {{ toYaml .rulesOverride | indent 4 }}
 {{- else }}
-  - name: validate-registries
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "Unknown image registry."
-      pattern:
-        spec:
-          containers:
-          - image: {{ .allowedRegistries | default "?*" | quote }}
+    - name: validate-registries
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Unknown image registry."
+        pattern:
+          spec:
+            containers:
+              - image: {{ .allowedRegistries | default "?*" | quote }}
 {{- end }}
 {{- end }}
 {{- end }}

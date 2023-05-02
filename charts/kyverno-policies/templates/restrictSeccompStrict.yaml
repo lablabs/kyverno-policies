@@ -30,9 +30,9 @@ spec:
     - name: check-seccomp-strict
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
         message: >-
           Use of custom Seccomp profiles is disallowed. The fields
@@ -42,35 +42,35 @@ spec:
           spec.ephemeralContainers[*].securityContext.seccompProfile.type
           must be set to `RuntimeDefault` or `Localhost`.
         anyPattern:
-        - spec:
-            securityContext:
-              seccompProfile:
-                type: "RuntimeDefault | Localhost"
-            =(ephemeralContainers):
-            - =(securityContext):
-                =(seccompProfile):
-                  =(type): "RuntimeDefault | Localhost"
-            =(initContainers):
-            - =(securityContext):
-                =(seccompProfile):
-                  =(type): "RuntimeDefault | Localhost"
-            containers:
-            - =(securityContext):
-                =(seccompProfile):
-                  =(type): "RuntimeDefault | Localhost"
-        - spec:
-            =(ephemeralContainers):
-            - securityContext:
+          - spec:
+              securityContext:
                 seccompProfile:
                   type: "RuntimeDefault | Localhost"
-            =(initContainers):
-            - securityContext:
-                seccompProfile:
-                  type: "RuntimeDefault | Localhost"
-            containers:
-            - securityContext:
-                seccompProfile:
-                  type: "RuntimeDefault | Localhost"
+              =(ephemeralContainers):
+                - =(securityContext):
+                    =(seccompProfile):
+                      =(type): "RuntimeDefault | Localhost"
+              =(initContainers):
+                - =(securityContext):
+                    =(seccompProfile):
+                      =(type): "RuntimeDefault | Localhost"
+              containers:
+                - =(securityContext):
+                    =(seccompProfile):
+                      =(type): "RuntimeDefault | Localhost"
+          - spec:
+              =(ephemeralContainers):
+                - securityContext:
+                    seccompProfile:
+                      type: "RuntimeDefault | Localhost"
+              =(initContainers):
+                - securityContext:
+                    seccompProfile:
+                      type: "RuntimeDefault | Localhost"
+              containers:
+                - securityContext:
+                    seccompProfile:
+                      type: "RuntimeDefault | Localhost"
 {{- end }}
 {{- end }}
 {{- end }}
