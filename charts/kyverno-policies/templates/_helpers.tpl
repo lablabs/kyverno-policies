@@ -29,34 +29,3 @@ Create chart name and version as used by the chart label.
 {{- define "kyverno-policies.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
-
-{{/*
-Common labels
-*/}}
-{{- define "kyverno-policies.labels" -}}
-helm.sh/chart: {{ include "kyverno-policies.chart" . }}
-{{ include "kyverno-policies.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "kyverno-policies.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kyverno-policies.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "kyverno-policies.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "kyverno-policies.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
