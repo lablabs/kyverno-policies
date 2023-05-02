@@ -34,21 +34,24 @@ spec:
           - resources:
               kinds:
                 - Ingress
-        preconditions:
-          all:
-            - key: "{{`{{ request.operation || 'BACKGROUND' }}`}}"
-              operator: AnyIn
-              value: ["CREATE", "UPDATE"]
-        validate:
-          message: "Wildcards are not permitted as hosts."
-          foreach:
-            - list: "request.object.spec.rules[].host"
-              deny:
-                conditions:
-                  any:
-                    - key: "{{`{{ contains(element, '*') }}`}}"
-                      operator: Equals
-                      value: true
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
+      preconditions:
+        all:
+          - key: "{{`{{ request.operation || 'BACKGROUND' }}`}}"
+            operator: AnyIn
+            value: ["CREATE", "UPDATE"]
+      validate:
+        message: "Wildcards are not permitted as hosts."
+        foreach:
+          - list: "request.object.spec.rules[].host"
+            deny:
+              conditions:
+                any:
+                  - key: "{{`{{ contains(element, '*') }}`}}"
+                    operator: Equals
+                    value: true
 {{- end }}
 {{- end }}
 {{- end }}

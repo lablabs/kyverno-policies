@@ -34,6 +34,9 @@ spec:
           - resources:
               kinds:
                 - Pod
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
       validate:
         message: >-
           Setting additional sysctls above the allowed type is disallowed.

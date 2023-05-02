@@ -32,6 +32,9 @@ spec:
           - resources:
               kinds:
                 - Service
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
       validate:
         message: "Services of type NodePort are not allowed."
         pattern:

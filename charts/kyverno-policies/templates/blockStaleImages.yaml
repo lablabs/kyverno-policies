@@ -31,6 +31,9 @@ spec:
           - resources:
               kinds:
                 - Pod
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
       validate:
         message: "Images built more than 6 months ago are prohibited."
         foreach:

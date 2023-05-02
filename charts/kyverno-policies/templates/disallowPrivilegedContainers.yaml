@@ -30,6 +30,9 @@ spec:
           - resources:
               kinds:
                 - Pod
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
       validate:
         message: >-
           Privileged mode is disallowed. The fields spec.containers[*].securityContext.privileged

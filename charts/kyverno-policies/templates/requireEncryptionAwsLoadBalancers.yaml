@@ -33,6 +33,9 @@ spec:
           - resources:
               kinds:
                 - Service
+{{- if .exclude }}
+      exclude: {{ toYaml .exclude | nindent 8 }}
+{{- end }}
       validate:
         message: "Service of type LoadBalancer must carry the annotation service.beta.kubernetes.io/aws-load-balancer-ssl-cert."
         pattern:
