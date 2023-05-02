@@ -1,0 +1,86 @@
+{{- $name := "disallowCapabilitiesStrict" }}
+{{- $category := "podSecurityRestricted" }}
+{{- $values := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if or $values.enabled $categoryValues.enabled }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-capabilities-strict
+  annotations:
+{{- with $values.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Disallow Capabilities (Strict)
+    policies.kyverno.io/category: Pod Security Standards (Restricted)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: 1.6.0
+    kyverno.io/kyverno-version: 1.6.0
+    kyverno.io/kubernetes-version: "1.22-1.23"
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Adding capabilities other than `NET_BIND_SERVICE` is disallowed. In addition,
+      all containers must explicitly drop `ALL` capabilities. Check https://kubernetes.io/docs/concepts/security/pod-security-standards/
+      for list of possible capabilities.
+spec:
+  validationFailureAction: {{ coalesce $values.validationFailureAction $categoryValues.validationFailureAction "Audit" }}
+  background: {{ coalesce $values.background $categoryValues.background "true" }}
+  rules:
+{{- if $values.rulesOverride }}
+{{ toYaml $values.rulesOverride | indent 4 }}
+{{- else }}
+    - name: require-drop-all
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $values.exclude }}
+      exclude: {{ toYaml $values.exclude | nindent 8 }}
+{{- end }}
+      preconditions:
+        all:
+          - key: "{{` request.operation || 'BACKGROUND' `}}"
+            operator: NotEquals
+            value: DELETE
+      validate:
+        message: >-
+          Containers must drop `ALL` capabilities.
+        foreach:
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
+            deny:
+              conditions:
+                all:
+                  - key: ALL
+                    operator: AnyNotIn
+                    value: "{{`{{`}} element.securityContext.capabilities.drop[] || `[]` {{`}}`}}"
+    - name: adding-capabilities-strict
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $values.exclude }}
+      exclude: {{ toYaml $values.exclude | nindent 8 }}
+{{- end }}
+      preconditions:
+        all:
+          - key: "{{` request.operation || 'BACKGROUND' `}}"
+            operator: NotEquals
+            value: DELETE
+      validate:
+        message: >-
+          Any capabilities added other than NET_BIND_SERVICE are disallowed.
+        foreach:
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
+            deny:
+              conditions:
+                all:
+                  - key: "{{`{{`}} element.securityContext.capabilities.add[] || `[]` {{`}}`}}"
+                    operator: AnyNotIn
+                    value:
+                      - NET_BIND_SERVICE
+                      - ''
+{{- end }}
+{{- end }}

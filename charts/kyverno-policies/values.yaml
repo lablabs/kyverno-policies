@@ -4,15 +4,18 @@
 nameOverride: ""
 fullnameOverride: ""
 
-policyTypes:
-  baseline:
+# Used to enable policies in bulk
+policyCategories:
+#  someCategory:
+#    enabled: false
+  podSecurityBaseline:
     enabled: false
-
-  restricted:
+  podSecurityRestricted:
     enabled: false
   other:
     enabled: false
 
+# Used to enable and override individual policies
 policies:
   blockStaleImages:
     enabled: false
@@ -80,3 +83,7 @@ policies:
     enabled: false
   restrictSysctls:
     enabled: false
+
+# Deploy extra resources
+extraDeploy: []
+
