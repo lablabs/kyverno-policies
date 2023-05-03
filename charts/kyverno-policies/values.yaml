@@ -4,13 +4,24 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Used to enable policies in bulk.
-# May override policy attributes for the entire category
+# Used to enable all policies. Categories or policies with value .disabled will be excluded.
+enableAll: false
+
+# Default policy settings according to https://kyverno.io/docs/writing-policies/policy-settings/
+background: true
+failurePolicy: Fail
+validationFailureAction: Audit
+validationFailureActionOverrides: []
+
+# Used to enable policies in bulk per category.
+# May override policy attributes for the entire category.
 policyCategories:
 #  exampleCategory:
-#    enabled: false
-#    validationFailureAction: Audit
-#    background: true
+#    enabled: false                   # Set true to enable category.
+#    disabled: false                  # Set true to disable all policies in category. Has precedence over .enabled.
+#    validationFailureAction: Audit   # Set validationFailureAction per category.
+#    failurePolicy: Fail              # Set failurePolicy per category.
+#    background: true                 # Set background per category.
   podSecurityBaseline:
     enabled: false
   podSecurityRestricted:
@@ -20,7 +31,17 @@ policyCategories:
 
 # Used to enable and override individual policies.
 # Policy override takes precedence over category override.
+# Policy name matches its filename.
 policies:
+#  examplePolicy:
+#    enabled: false                   # Set true to enable policy. Policy will be deployed if .Values.enableAll or .Values.<categoryOfPolicy>.
+#    disabled: false                  # Set true to disable policy. Has precedence over .enabled.
+#    validationFailureAction: Audit   # Set validationFailureAction per policy.
+#    failurePolicy: Fail              # Set failurePolicy per policy.
+#    background: true                 # Set background per policy.
+#    someOtherAttribute: "foobar"     # Set any other attribute.
+#    rulesOverride: []                # Override all rules within a policy.
+#    exclude: {}                      # Set exclude block for every rule within a policy.
   blockStaleImages:
     enabled: false
 #    imageAge: "4380h" # Images older than imageAge are non-compliant
@@ -60,34 +81,35 @@ policies:
     enabled: false
   requireEncryptionAwsLoadBalancers:
     enabled: false
-  requireRunAsNonRoot:
-    enabled: false
-  requireRunAsNonRootUser:
-    enabled: false
   requireLabels:
     enabled: false
 #    requiredLabels:   # Key-value pairs of required labels and their values
 #      label1: "?*"
   requireRoRootFs:
     enabled: false
+  requireRunAsNonRoot:
+    enabled: false
+  requireRunAsNonRootUser:
+    enabled: false
   restrictAppArmor:
     enabled: false
   restrictIngressWildcard:
-    enabled: false
-  restrictSeccompStrict:
-    enabled: false
-  restrictServiceExternalIps:
-    enabled: false
-  restrictVolumeTypes:
     enabled: false
   restrictImageRegistries:
     enabled: false
 #    allowedRegistries: "eu.foo.io/* | bar.io/*"   # Pipe separated list of allowed registries
   restrictNodePort:
     enabled: false
+  restrictSeccompStrict:
+    enabled: false
+  restrictServiceExternalIps:
+    enabled: false
   restrictSysctls:
     enabled: false
+  restrictVolumeTypes:
+    enabled: false
 
-# Deploy extra resources
-extraDeploy: []
+# List of extra manifests to deploy.
+# Can be used to deploy your custom policies.
+extraManifests: []
 

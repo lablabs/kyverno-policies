@@ -33,9 +33,9 @@ Create chart name and version as used by the chart label.
 {{/*
 Renders a value that contains template. Based on https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_tplvalues.tpl
 Usage:
-{{ include "kyverno-policies.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
+{{ include "kyverno-policies.extraManifests" ( dict "value" .Values.path.to.the.Value "context" $) }}
 */}}
-{{- define "kyverno-policies.extraDeploy" -}}
+{{- define "kyverno-policies.extraManifests" -}}
     {{- if typeIs "string" .value }}
         {{- tpl .value .context }}
     {{- else }}

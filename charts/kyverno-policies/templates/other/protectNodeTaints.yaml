@@ -1,15 +1,15 @@
 {{- $name := "protectNodeTaints" }}
 {{- $category := "other" }}
-{{- $values := get .Values.policies $name }}
+{{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if or $values.enabled $categoryValues.enabled }}
+{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: protect-node-taints
   annotations:
-{{- with $values.autogenControllers }}
+{{- with $policyValues.autogenControllers }}
     pod-policies.kyverno.io/autogen-controllers: {{ . }}
 {{- end }}
     policies.kyverno.io/title: Protect Node Taints
@@ -26,12 +26,14 @@ metadata:
       requires, at minimum, one of the following versions of Kubernetes:
       v1.18.18, v1.19.10, v1.20.6, or v1.21.0.
 spec:
-  validationFailureAction: {{ coalesce $values.validationFailureAction $categoryValues.validationFailureAction "Audit" }}
+  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
+  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
   background: false # Checks only live during update, background checks not necessary
-  failurePolicy: {{ $values.failurePolicy | default "Ignore" }} # To prevent outage if all nodes Kyverno is running on terminate unexpectedly, failurePolicy is set to Ignore for node policies instead of default Fail
+  # To prevent outage if all nodes Kyverno is running on terminate unexpectedly, failurePolicy is set to Ignore for node policies instead of default Fail
+  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy "Ignore" }}
   rules:
-{{- if $values.rulesOverride }}
-{{ toYaml $values.rulesOverride | indent 4 }}
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
 {{- else }}
     - name: protect-node-taints
       match:

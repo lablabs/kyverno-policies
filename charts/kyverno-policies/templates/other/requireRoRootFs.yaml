@@ -1,15 +1,15 @@
 {{- $name := "requireRoRootFs" }}
 {{- $category := "other" }}
-{{- $values := get .Values.policies $name }}
+{{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if or $values.enabled $categoryValues.enabled }}
+{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: require-ro-rootfs
   annotations:
-{{- with $values.autogenControllers }}
+{{- with $policyValues.autogenControllers }}
     pod-policies.kyverno.io/autogen-controllers: {{ . }}
 {{- end }}
     policies.kyverno.io/title: Require Read-Only Root Filesystem
@@ -24,11 +24,19 @@ metadata:
       host system. This policy validates that containers define a securityContext
       with `readOnlyRootFilesystem: true`.
 spec:
-  validationFailureAction: {{ coalesce $values.validationFailureAction $categoryValues.validationFailureAction "Audit" }}
-  background: {{ coalesce $values.background $categoryValues.background "true" }}
+  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
+  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
+{{- if hasKey $policyValues "background" }}
+  background: {{ $policyValues.background }}
+{{- else if hasKey $categoryValues "background" }}
+  background: {{ $categoryValues.background }}
+{{- else }}
+  background: {{ .Values.background }}
+{{- end }}
+  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
   rules:
-{{- if $values.rulesOverride }}
-{{ toYaml $values.rulesOverride | indent 4 }}
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
 {{- else }}
     - name: validate-readOnlyRootFilesystem
       match:
@@ -36,8 +44,8 @@ spec:
           - resources:
               kinds:
                 - Pod
-{{- if $values.exclude }}
-      exclude: {{ toYaml $values.exclude | nindent 8 }}
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
 {{- end }}
       validate:
         message: "Root filesystem must be read-only."
