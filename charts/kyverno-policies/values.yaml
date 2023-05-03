@@ -77,7 +77,7 @@ policies:
     enabled: false
   preventNakedPods:
     enabled: false
-  protectNodeTaints: # Good candidate for enforce
+  protectNodeTaints:
     enabled: false
   requireEncryptionAwsLoadBalancers:
     enabled: false
