@@ -4,10 +4,13 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Used to enable policies in bulk
+# Used to enable policies in bulk.
+# May override policy attributes for the entire category
 policyCategories:
-#  someCategory:
+#  exampleCategory:
 #    enabled: false
+#    validationFailureAction: Audit
+#    background: true
   podSecurityBaseline:
     enabled: false
   podSecurityRestricted:
@@ -15,7 +18,8 @@ policyCategories:
   other:
     enabled: false
 
-# Used to enable and override individual policies
+# Used to enable and override individual policies.
+# Policy override takes precedence over category override.
 policies:
   blockStaleImages:
     enabled: false

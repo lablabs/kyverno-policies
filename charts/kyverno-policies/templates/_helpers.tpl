@@ -29,3 +29,16 @@ Create chart name and version as used by the chart label.
 {{- define "kyverno-policies.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Renders a value that contains template. Based on https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_tplvalues.tpl
+Usage:
+{{ include "kyverno-policies.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
+*/}}
+{{- define "kyverno-policies.extraDeploy" -}}
+    {{- if typeIs "string" .value }}
+        {{- tpl .value .context }}
+    {{- else }}
+        {{- tpl (.value | toYaml) .context }}
+    {{- end }}
+{{- end -}}
