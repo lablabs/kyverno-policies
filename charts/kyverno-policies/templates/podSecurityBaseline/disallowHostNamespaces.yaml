@@ -7,13 +7,13 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: disallow-host-namespaces
+  name: {{ kebabcase $name }}
   annotations:
 {{- with $policyValues.autogenControllers }}
     pod-policies.kyverno.io/autogen-controllers: {{ . }}
 {{- end }}
     policies.kyverno.io/title: Disallow Host Namespaces
-    policies.kyverno.io/category: Pod Security Standards (Baseline)
+    policies.kyverno.io/category: {{ $category }}
     policies.kyverno.io/severity: medium
     kyverno.io/kyverno-version: 1.6.0
     kyverno.io/kubernetes-version: "1.22-1.23"

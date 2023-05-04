@@ -7,13 +7,13 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: protect-node-taints
+  name: {{ kebabcase $name }}
   annotations:
 {{- with $policyValues.autogenControllers }}
     pod-policies.kyverno.io/autogen-controllers: {{ . }}
 {{- end }}
     policies.kyverno.io/title: Protect Node Taints
-    policies.kyverno.io/category: Other
+    policies.kyverno.io/category: {{ $category }}
     policies.kyverno.io/subject: Node
     policies.kyverno.io/minversion: 1.6.0
     policies.kyverno.io/description: >-
@@ -29,8 +29,7 @@ spec:
   validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
   validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
   background: false # Checks only live during update, background checks not necessary
-  # To prevent outage if all nodes Kyverno is running on terminate unexpectedly, failurePolicy is set to Ignore for node policies instead of default Fail
-  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy "Ignore" }}
+  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}
