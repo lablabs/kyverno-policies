@@ -1,18 +1,21 @@
-# Default values for kyverno-policies.
+# -- nameOverride
 nameOverride: ""
+# -- fullnameOverride
 fullnameOverride: ""
 
-# Used to enable all policies. Categories or policies with value .disabled will be excluded.
+# -- Used to enable all policies. Categories or policies with value .disabled will be excluded.
 enableAll: false
 
-# Default policy settings according to https://kyverno.io/docs/writing-policies/policy-settings/
+# -- Default background policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 background: true
+# -- Default failurePolicy policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 failurePolicy: Fail
+# -- Default validationFailureAction policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 validationFailureAction: Audit
+# -- Default validationFailureActionOverrides policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 validationFailureActionOverrides: []
 
-# Used to enable policies in bulk per category.
-# May override policy attributes for the entire category.
+# -- Used to enable policies in bulk per category. May override policy attributes for the entire category.
 policyCategories:
 #  exampleCategory:
 #    enabled: false                   # Set true to enable category.
@@ -27,9 +30,7 @@ policyCategories:
   other:
     enabled: false
 
-# Used to enable and override individual policies.
-# Policy override takes precedence over category override.
-# Policy name matches its filename.
+# -- Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename.
 policies:
 #  examplePolicy:
 #    enabled: false                   # Set true to enable policy. Policy will be deployed if .Values.enableAll or .Values.<categoryOfPolicy>.
@@ -107,6 +108,5 @@ policies:
   restrictVolumeTypes:
     enabled: false
 
-# List of extra manifests to deploy.
-# Can be used to deploy your custom policies.
+# -- List of extra manifests to deploy. Can be used to deploy your custom policies.
 extraManifests: []
