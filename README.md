@@ -1,2 +1,1 @@
-# kyverno-policies
-Helm chart to deploy Kyverno policies.
+# kyverno-policies Helm repository
