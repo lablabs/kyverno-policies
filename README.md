@@ -8,7 +8,16 @@ We help companies build, run, deploy and scale software and infrastructure by em
 
 ## Description
 Helm chart to deploy Kyverno policies.
-Policies are divided into deployable categories.
+Policy categories:
+- **podSecurityBaseline** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline
+- **podSecurityRestricted** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+- **other**
+
+## Installation
+````shell
+helm repo add kyverno-policies https://lablabs.github.io/kyverno-policies/
+helm install kyverno-policies kyverno-policies/kyverno-policies
+````
 
 ## Chart values
 Check out current available values in the chart [README.md](charts/kyverno-policies/README.md)
