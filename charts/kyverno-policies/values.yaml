@@ -43,7 +43,7 @@ policies:
   blockStaleImages: {}
 #    imageAge: "4380h" # Images older than imageAge are non-compliant
   checkServiceAccount:
-    background: false # Shouldn't be set to true, because variable {{`{{serviceAccountName}}`}} is not allowed
+    background: false   # Shouldn't be set to true, because variable {{`{{serviceAccountName}}`}} is not allowed
   disableAutomountServiceAccountToken: {}
   disablePodAutomountServiceAccountToken: {}
   disableServiceDiscovery: {}
@@ -60,7 +60,7 @@ policies:
   disallowSELinux: {}
   preventNakedPods: {}
   protectNodeTaints:
-    background: false # Checks only live during update, background checks not necessary
+    background: false   # Checks only live during update, background checks not necessary
   requireEncryptionAwsLoadBalancers: {}
   requireLabels: {}
 #    requiredLabels:   # Key-value pairs of required labels and their values
