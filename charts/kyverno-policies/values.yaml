@@ -3,9 +3,6 @@ nameOverride: ""
 # -- fullnameOverride
 fullnameOverride: ""
 
-# -- Used to enable all policies. Categories or policies with value .disabled will be excluded.
-enableAll: false
-
 # -- Default background policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 background: true
 # -- Default failurePolicy policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
@@ -25,95 +22,61 @@ validationFailureActionOverrides: []
 # -- Used to enable policies in bulk per category. May override policy attributes for the entire category.
 policyCategories:
 #  exampleCategory:
-#    enabled: false                   # Set true to enable category.
-#    disabled: false                  # Set true to disable all policies in category. Has precedence over .enabled.
+#    enabled: false                   # Set true to enable category. Set to false to explicitly disable category.
 #    validationFailureAction: Audit   # Set validationFailureAction per category.
 #    failurePolicy: Fail              # Set failurePolicy per category.
 #    background: true                 # Set background per category.
-  podSecurityBaseline:
-    enabled: false
-  podSecurityRestricted:
-    enabled: false
-  other:
-    enabled: false
+  podSecurityBaseline: {}
+  podSecurityRestricted: {}
+  other: {}
 
 # -- Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename.
 policies:
 #  examplePolicy:
-#    enabled: false                   # Set true to enable policy. Policy will be deployed if .Values.enableAll or .Values.<categoryOfPolicy>.
-#    disabled: false                  # Set true to disable policy. Has precedence over .enabled.
+#    enabled: false                   # Set true to enable policy. Set to false to disable policy. If value is false, policy will not be deployed even if the category is enabled.
 #    validationFailureAction: Audit   # Set validationFailureAction per policy.
 #    failurePolicy: Fail              # Set failurePolicy per policy.
 #    background: true                 # Set background per policy.
 #    someOtherAttribute: "foobar"     # Set any other attribute.
 #    rulesOverride: []                # Override all rules within a policy.
 #    exclude: {}                      # Set exclude block for every rule within a policy.
-  blockStaleImages:
-    enabled: false
+  blockStaleImages: {}
 #    imageAge: "4380h" # Images older than imageAge are non-compliant
   checkServiceAccount:
-    enabled: false
-  disableAutomountServiceAccountToken:
-    enabled: false
-  disablePodAutomountServiceAccountToken:
-    enabled: false
-  disableServiceDiscovery:
-    enabled: false
-  disallowAllSecrets:
-    enabled: false
-  disallowCapabilitiesStrict:
-    enabled: false
-  disallowDefaultNamespace:
-    enabled: false
-  disallowEmptyIngressHost:
-    enabled: false
-  disallowHostNamespaces:
-    enabled: false
-  disallowHostPath:
-    enabled: false
-  disallowHostPorts:
-    enabled: false
-  disallowProcMount:
-    enabled: false
-  disallowPrivilegedContainers:
-    enabled: false
-  disallowPrivilegeEscalation:
-    enabled: false
-  disallowSELinux:
-    enabled: false
-  preventNakedPods:
-    enabled: false
+    background: false # Shouldn't be set to true, because variable {{`{{serviceAccountName}}`}} is not allowed
+  disableAutomountServiceAccountToken: {}
+  disablePodAutomountServiceAccountToken: {}
+  disableServiceDiscovery: {}
+  disallowAllSecrets: {}
+  disallowCapabilitiesStrict: {}
+  disallowDefaultNamespace: {}
+  disallowEmptyIngressHost: {}
+  disallowHostNamespaces: {}
+  disallowHostPath: {}
+  disallowHostPorts: {}
+  disallowProcMount: {}
+  disallowPrivilegedContainers: {}
+  disallowPrivilegeEscalation: {}
+  disallowSELinux: {}
+  preventNakedPods: {}
   protectNodeTaints:
-    enabled: false
-  requireEncryptionAwsLoadBalancers:
-    enabled: false
-  requireLabels:
-    enabled: false
+    background: false # Checks only live during update, background checks not necessary
+  requireEncryptionAwsLoadBalancers: {}
+  requireLabels: {}
 #    requiredLabels:   # Key-value pairs of required labels and their values
 #      label1: "?*"
-  requireRoRootFs:
-    enabled: false
-  requireRunAsNonRoot:
-    enabled: false
-  requireRunAsNonRootUser:
-    enabled: false
-  restrictAppArmor:
-    enabled: false
-  restrictIngressWildcard:
-    enabled: false
-  restrictImageRegistries:
-    enabled: false
+  requireRoRootFs: {}
+  requireRunAsNonRoot: {}
+  requireRunAsNonRootUser: {}
+  restrictAppArmor: {}
+  restrictIngressWildcard: {}
+  restrictImageRegistries: {}
 #    allowedRegistries: "eu.foo.io/* | bar.io/*"   # Pipe separated list of allowed registries
-  restrictNodePort:
-    enabled: false
-  restrictSeccompStrict:
-    enabled: false
-  restrictServiceExternalIps:
-    enabled: false
-  restrictSysctls:
-    enabled: false
-  restrictVolumeTypes:
-    enabled: false
+  restrictNodePort: {}
+  restrictSeccompStrict: {}
+  restrictServiceExternalIps: {}
+  restrictSysctls: {}
+  restrictVolumeTypes: {}
 
 # -- List of extra manifests to deploy. Can be used to deploy your custom policies.
 extraManifests: []

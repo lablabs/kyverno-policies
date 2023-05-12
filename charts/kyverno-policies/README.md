@@ -27,32 +27,34 @@ policies:
 ````
 #### Enable a category
 ````yaml
+# All policies within the category will be deployed
 policyCategories:
   myCategory:
     enabled: true
 ````
-#### Enable all policies
-````yaml
-enableAll: true
-````
-#### Disable a policy or category
-If you want to explicitly disable policies or entire categories - even if a higher level is enabled - set the `.disabled` value.
-````yaml
-# All policies are enabled
-enableAll: true
 
-# All policies within the category myCategory will not be deployed
+#### Disable a policy or category
+In case you want to deploy an entire category except for just a few policies, you can explicitly disable the unwanted
+policies by setting their `enabled` value to `false`
+````yaml
+# Category myCategory is enabled
 policyCategories:
   myCategory:
-    disabled: true
+    enabled: true
 
-# The policy myPolicy will not be deployed
-# If both disabled and enabled are specified, disabling takes precedence
+# The policy myPolicy is part of myCategory. By setting enabled: false, it will not be deployed even if the category is enabled.
 policies:
   myPolicy:
-    disabled: true
-    enabled: true
+    enabled: false
 ````
+The following table shows the results of possible combinations for the `enabled` values on the policy(p) and category(c) level.
+`true` means policy will be deployed, `false` means policy will not be deployed. Policy value has precedence over category value.
+
+| enabled     | true(c) | false(c) | no value(c) |
+|-------------|---------|----------|-------------|
+| true(p)     | true    | true     | true        |
+| false(p)    | false   | false    | false       |
+| no value(p) | true    | false    | false       |
 
 ### Set attributes
 #### Set `validationFailureAction for a policy
@@ -96,9 +98,6 @@ Most values are overridden in the following order of priority, from highest to l
 3. Chart
 #### Example
 ````yaml
-# All policies are enabled
-enableAll: true
-
 # Chart setting
 validationFailureAction: Audit
 
@@ -114,14 +113,14 @@ policies:
     validationFailureAction: Audit
 ````
 
-### Deploy a custom policy
-If you have a custom policy that you would like to deploy as part of the Helm release, provide its manifest in `.Values.extraManifests`:
+### Deploy custom policie
+If you have custom policie you would like to deploy as part of the Helm release, provide their manifests in `.Values.extraManifests`:
 ````yaml
 extraManifests:
   - apiVersion: kyverno.io/v1
     kind: ClusterPolicy
-    metadata: ...
-    spec: ...
+    metadata: # metadata
+    spec: # spec
 ````
 
 ## Adding a new policy
@@ -134,32 +133,19 @@ extraManifests:
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
-...
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+# The policy goes here
 {{- end }}
 ````
 4. Provide useful [Kyverno annotations](https://github.com/kyverno/policies/wiki/Kyverno-annotations)
-5. Allow override of default policy [settings](https://kyverno.io/docs/writing-policies/policy-settings/) in `spec` (if applicable).
-````yaml
-spec:
-  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
-  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
-{{- if hasKey $policyValues "background" }}
-  background: {{ $policyValues.background }}
-{{- else if hasKey $categoryValues "background" }}
-  background: {{ $categoryValues.background }}
-{{- else }}
-  background: {{ .Values.background }}
-{{- end }}
-  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
-````
+5. [Policy settings](https://kyverno.io/docs/writing-policies/policy-settings/) are rendered via the kyverno-policies.policySettings template within _helpers.tpl. If your policy setting is not listed yet, add it there with appropriate overrides.
 6. Add the `rules` block
 ````yaml
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}
 {{- else }}
-...
+# Your rules go here
 {{- end }}
 ````
 7. Allow override of the `exclude` block within your rules (if appropriate)
@@ -168,29 +154,27 @@ spec:
       exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
 {{- end }}
 ````
-8. Add your policy and category to values.yaml
+8. Add your policy and/or category to values.yaml
 ````yaml
 policyCategories:
-  myCategory:
-    enabled: false
+  myCategory: {}
 
 policies:
-  myPolicy:
-    enabled: false
+  myPolicy: {}
 ````
+9. Document your changes
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | background | bool | `true` | Default background policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
-| enableAll | bool | `false` | Used to enable all policies. Categories or policies with value .disabled will be excluded. |
 | extraManifests | list | `[]` | List of extra manifests to deploy. Can be used to deploy your custom policies. |
 | failurePolicy | string | `"Fail"` | Default failurePolicy policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
 | fullnameOverride | string | `""` | fullnameOverride |
 | nameOverride | string | `""` | nameOverride |
-| policies | object | `{"blockStaleImages":{"enabled":false},"checkServiceAccount":{"enabled":false},"disableAutomountServiceAccountToken":{"enabled":false},"disablePodAutomountServiceAccountToken":{"enabled":false},"disableServiceDiscovery":{"enabled":false},"disallowAllSecrets":{"enabled":false},"disallowCapabilitiesStrict":{"enabled":false},"disallowDefaultNamespace":{"enabled":false},"disallowEmptyIngressHost":{"enabled":false},"disallowHostNamespaces":{"enabled":false},"disallowHostPath":{"enabled":false},"disallowHostPorts":{"enabled":false},"disallowPrivilegeEscalation":{"enabled":false},"disallowPrivilegedContainers":{"enabled":false},"disallowProcMount":{"enabled":false},"disallowSELinux":{"enabled":false},"preventNakedPods":{"enabled":false},"protectNodeTaints":{"enabled":false},"requireEncryptionAwsLoadBalancers":{"enabled":false},"requireLabels":{"enabled":false},"requireRoRootFs":{"enabled":false},"requireRunAsNonRoot":{"enabled":false},"requireRunAsNonRootUser":{"enabled":false},"restrictAppArmor":{"enabled":false},"restrictImageRegistries":{"enabled":false},"restrictIngressWildcard":{"enabled":false},"restrictNodePort":{"enabled":false},"restrictSeccompStrict":{"enabled":false},"restrictServiceExternalIps":{"enabled":false},"restrictSysctls":{"enabled":false},"restrictVolumeTypes":{"enabled":false}}` | Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename. |
-| policyCategories | object | `{"other":{"enabled":false},"podSecurityBaseline":{"enabled":false},"podSecurityRestricted":{"enabled":false}}` | Used to enable policies in bulk per category. May override policy attributes for the entire category. |
+| policies | object | `{"blockStaleImages":{},"checkServiceAccount":{"background":false},"disableAutomountServiceAccountToken":{},"disablePodAutomountServiceAccountToken":{},"disableServiceDiscovery":{},"disallowAllSecrets":{},"disallowCapabilitiesStrict":{},"disallowDefaultNamespace":{},"disallowEmptyIngressHost":{},"disallowHostNamespaces":{},"disallowHostPath":{},"disallowHostPorts":{},"disallowPrivilegeEscalation":{},"disallowPrivilegedContainers":{},"disallowProcMount":{},"disallowSELinux":{},"preventNakedPods":{},"protectNodeTaints":{"background":false},"requireEncryptionAwsLoadBalancers":{},"requireLabels":{},"requireRoRootFs":{},"requireRunAsNonRoot":{},"requireRunAsNonRootUser":{},"restrictAppArmor":{},"restrictImageRegistries":{},"restrictIngressWildcard":{},"restrictNodePort":{},"restrictSeccompStrict":{},"restrictServiceExternalIps":{},"restrictSysctls":{},"restrictVolumeTypes":{}}` | Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename. |
+| policyCategories | object | `{"other":{},"podSecurityBaseline":{},"podSecurityRestricted":{}}` | Used to enable policies in bulk per category. May override policy attributes for the entire category. |
 | validationFailureAction | string | `"Audit"` | Default validationFailureAction policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
 | validationFailureActionOverrides | list | `[]` | Default validationFailureActionOverrides policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
 

@@ -3,7 +3,7 @@
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -26,10 +26,7 @@ metadata:
       requires, at minimum, one of the following versions of Kubernetes:
       v1.18.18, v1.19.10, v1.20.6, or v1.21.0.
 spec:
-  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
-  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
-  background: false # Checks only live during update, background checks not necessary
-  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}

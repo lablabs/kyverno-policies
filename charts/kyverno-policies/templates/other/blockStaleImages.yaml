@@ -3,7 +3,7 @@
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -24,16 +24,7 @@ metadata:
       This policy checks the contents of every container image and inspects them for the create time.
       If it finds any image which was built more than 6 months ago this policy blocks the deployment.
 spec:
-  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
-  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
-{{- if hasKey $policyValues "background" }}
-  background: {{ $policyValues.background }}
-{{- else if hasKey $categoryValues "background" }}
-  background: {{ $categoryValues.background }}
-{{- else }}
-  background: {{ .Values.background }}
-{{- end }}
-  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}

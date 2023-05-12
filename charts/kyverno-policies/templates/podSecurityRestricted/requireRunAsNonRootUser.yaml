@@ -3,7 +3,7 @@
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
-{{- if and (or $policyValues.enabled $categoryValues.enabled .Values.enableAll) (not (or $policyValues.disabled $categoryValues.disabled)) }}
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -22,16 +22,7 @@ metadata:
       Containers must be required to run as non-root users. This policy ensures
       `runAsUser` is either unset or set to a number greater than zero.
 spec:
-  validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction .Values.validationFailureAction }}
-  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides .Values.validationFailureActionOverrides) | nindent 4 }}
-{{- if hasKey $policyValues "background" }}
-  background: {{ $policyValues.background }}
-{{- else if hasKey $categoryValues "background" }}
-  background: {{ $categoryValues.background }}
-{{- else }}
-  background: {{ .Values.background }}
-{{- end }}
-  failurePolicy: {{ coalesce $policyValues.failurePolicy $categoryValues.failurePolicy .Values.failurePolicy }}
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}
