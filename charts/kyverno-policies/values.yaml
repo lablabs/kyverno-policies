@@ -14,6 +14,13 @@ failurePolicy: Fail
 validationFailureAction: Audit
 # -- Default validationFailureActionOverrides policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
 validationFailureActionOverrides: []
+#validationFailureActionOverrides:
+#  - action: Enforce     # Action to apply
+#    namespaces:       # List of affected namespaces
+#      - default
+#  - action: Audit
+#    namespaces:
+#      - test
 
 # -- Used to enable policies in bulk per category. May override policy attributes for the entire category.
 policyCategories:
