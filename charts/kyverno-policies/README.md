@@ -33,9 +33,9 @@ policyCategories:
     enabled: true
 ````
 
-#### Disable a policy or category
+#### Disable a policy
 In case you want to deploy an entire category except for just a few policies, you can explicitly disable the unwanted
-policies by setting their `enabled` value to `false`
+policies by setting their `enabled` value to `false`.
 ````yaml
 # Category myCategory is enabled
 policyCategories:
