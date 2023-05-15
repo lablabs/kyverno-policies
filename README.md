@@ -9,7 +9,7 @@ We help companies build, run, deploy and scale software and infrastructure by em
 ## Description
 Helm chart to deploy Kyverno policies.
 
-Check out [charts/kyverno-policies/README.md](charts/<$chart-name>/README.md) for more details about the chart.
+Check out [charts/kyverno-policies/README.md](charts/kyverno-policies/README.md) for more details about the chart.
 
 ## Contributing and reporting issues
 Feel free to create an issue in this repository if you have questions, suggestions or feature requests.
