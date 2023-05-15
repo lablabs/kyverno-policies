@@ -1,0 +1,7 @@
+policyCategories:
+  podSecurityBaseline:
+    enabled: true
+  podSecurityRestricted:
+    enabled: true
+  other:
+    enabled: true

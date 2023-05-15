@@ -1,0 +1,82 @@
+# -- nameOverride
+nameOverride: ""
+# -- fullnameOverride
+fullnameOverride: ""
+
+# -- Default background policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
+background: true
+# -- Default failurePolicy policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
+failurePolicy: Fail
+# -- Default validationFailureAction policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
+validationFailureAction: Audit
+# -- Default validationFailureActionOverrides policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/
+validationFailureActionOverrides: []
+# validationFailureActionOverrides:
+#   - action: Enforce     # Action to apply
+#     namespaces:       # List of affected namespaces
+#       - default
+#   - action: Audit
+#     namespaces:
+#       - test
+
+# -- Used to enable policies in bulk per category. May override policy attributes for the entire category.
+policyCategories:
+#  exampleCategory:
+#    enabled: false                   # Set true to enable category. Set to false to explicitly disable category.
+#    validationFailureAction: Audit   # Set validationFailureAction per category.
+#    failurePolicy: Fail              # Set failurePolicy per category.
+#    background: true                 # Set background per category.
+  podSecurityBaseline: {}
+  podSecurityRestricted: {}
+  other: {}
+
+# -- Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename.
+policies:
+#  examplePolicy:
+#    enabled: false                   # Set true to enable policy. Set to false to disable policy. If value is false, policy will not be deployed even if the category is enabled.
+#    validationFailureAction: Audit   # Set validationFailureAction per policy.
+#    failurePolicy: Fail              # Set failurePolicy per policy.
+#    background: true                 # Set background per policy.
+#    someOtherAttribute: "foobar"     # Set any other attribute.
+#    rulesOverride: []                # Override all rules within a policy.
+#    exclude: {}                      # Set exclude block for every rule within a policy.
+  blockStaleImages: {}
+#    imageAge: "4380h" # Images older than imageAge are non-compliant
+  checkServiceAccount:
+    background: false   # Shouldn't be set to true, because variable {{`{{serviceAccountName}}`}} is not allowed
+  disableAutomountServiceAccountToken: {}
+  disablePodAutomountServiceAccountToken: {}
+  disableServiceDiscovery: {}
+  disallowAllSecrets: {}
+  disallowCapabilitiesStrict: {}
+  disallowDefaultNamespace: {}
+  disallowEmptyIngressHost: {}
+  disallowHostNamespaces: {}
+  disallowHostPath: {}
+  disallowHostPorts: {}
+  disallowProcMount: {}
+  disallowPrivilegedContainers: {}
+  disallowPrivilegeEscalation: {}
+  disallowSELinux: {}
+  preventNakedPods: {}
+  protectNodeTaints:
+    background: false   # Checks only live during update, background checks not necessary
+  requireEncryptionAwsLoadBalancers: {}
+  requireLabels: {}
+#    requiredLabels:   # Key-value pairs of required labels and their values
+#      label1: "?*"
+  requireRoRootFs: {}
+  requireRunAsNonRoot: {}
+  requireRunAsNonRootUser: {}
+  restrictAppArmor: {}
+  restrictIngressWildcard: {}
+  restrictImageRegistries: {}
+#    allowedRegistries: "eu.foo.io/* | bar.io/*"   # Pipe separated list of allowed registries
+  restrictNodePort: {}
+  restrictSeccompStrict: {}
+  restrictServiceExternalIps: {}
+  restrictSysctls: {}
+  restrictVolumeTypes: {}
+
+# -- List of extra manifests to deploy. Can be used to deploy your custom policies.
+extraManifests: []

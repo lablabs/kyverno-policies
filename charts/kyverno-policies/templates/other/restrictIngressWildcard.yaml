@@ -1,0 +1,59 @@
+{{- $name := "restrictIngressWildcard" }}
+{{- $category := "other" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+{{- with $policyValues.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Restrict Ingress Host with Wildcards
+    policies.kyverno.io/category: {{ $category }}, Other
+    policies.kyverno.io/severity: medium
+    kyverno.io/kyverno-version: 1.6.2
+    policies.kyverno.io/minversion: 1.6.0
+    kyverno.io/kubernetes-version: "1.23"
+    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/description: >-
+      Ingress hosts optionally accept a wildcard as an alternative
+      to precise matching. In some cases, this may be too permissive as it
+      would direct unintended traffic to the given Ingress resource. This
+      policy enforces that any Ingress host does not contain a wildcard
+      character.
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: block-ingress-wildcard
+      match:
+        any:
+          - resources:
+              kinds:
+                - Ingress
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      preconditions:
+        all:
+          - key: "{{`{{ request.operation || 'BACKGROUND' }}`}}"
+            operator: AnyIn
+            value: ["CREATE", "UPDATE"]
+      validate:
+        message: "Wildcards are not permitted as hosts."
+        foreach:
+          - list: "request.object.spec.rules[].host"
+            deny:
+              conditions:
+                any:
+                  - key: "{{`{{ contains(element, '*') }}`}}"
+                    operator: Equals
+                    value: true
+{{- end }}
+{{- end }}

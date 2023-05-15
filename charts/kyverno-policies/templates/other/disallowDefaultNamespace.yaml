@@ -1,0 +1,64 @@
+{{- $name := "disallowDefaultNamespace" }}
+{{- $category := "other" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Disallow Default Namespace
+    policies.kyverno.io/minversion: 1.6.0
+    policies.kyverno.io/category: {{ $category }}, Multi-Tenancy
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Kubernetes Namespaces are an optional feature that provide a way to segment and
+      isolate cluster resources across multiple applications and users. As a best
+      practice, workloads should be isolated with Namespaces. Namespaces should be required
+      and the default (empty) Namespace should not be used. This policy validates that Pods
+      specify a Namespace name other than `default`. Rule auto-generation is disabled here
+      due to Pod controllers need to specify the `namespace` field under the top-level `metadata`
+      object and not at the Pod template level.
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: validate-namespace
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: "Using 'default' namespace is not allowed."
+        pattern:
+          metadata:
+            namespace: "!default"
+    - name: validate-podcontroller-namespace
+      match:
+        any:
+          - resources:
+              kinds:
+                - DaemonSet
+                - Deployment
+                - Job
+                - StatefulSet
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: "Using 'default' namespace is not allowed for pod controllers."
+        pattern:
+          metadata:
+            namespace: "!default"
+{{- end }}
+{{- end }}

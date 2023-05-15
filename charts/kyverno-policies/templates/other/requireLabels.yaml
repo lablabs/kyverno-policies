@@ -1,0 +1,47 @@
+{{- $name := "requireLabels" }}
+{{- $category := "other" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+{{- with $policyValues.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Require Labels
+    policies.kyverno.io/category: {{ $category }}, Best Practices
+    policies.kyverno.io/minversion: 1.6.0
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Label
+    policies.kyverno.io/description: >-
+      Define and use labels that identify semantic attributes of your application or Deployment.
+      A common set of labels allows tools to work collaboratively, describing objects in a common manner that
+      all tools can understand. The recommended labels describe applications in a way that can be
+      queried. .Set requiredLabels as a map of key-value pairs of required labels, and also required label values,
+      e.g. "app.kubernetes.io/name": "?*" specifies that app.kubernetes.io/name label is required with any value.
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: check-for-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: "All labels in .requiredLabels must be set by the Pod."
+        pattern:
+          metadata:
+            labels: {{ toYaml $policyValues.requiredLabels | nindent 14 }}
+{{- end }}
+{{- end }}

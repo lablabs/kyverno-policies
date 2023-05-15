@@ -1,0 +1,70 @@
+{{- $name := "requireRunAsNonRoot" }}
+{{- $category := "podSecurityRestricted" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+{{- with $policyValues.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Require runAsNonRoot
+    policies.kyverno.io/category: {{ $category }}
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    kyverno.io/kyverno-version: 1.6.0
+    kyverno.io/kubernetes-version: "1.22-1.23"
+    policies.kyverno.io/description: >-
+      Containers must be required to run as non-root users. This policy ensures
+      `runAsNonRoot` is set to `true`. A known issue prevents a policy such as this
+      using `anyPattern` from being persisted properly in Kubernetes 1.23.0-1.23.2.
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: >-
+          Running as root is not allowed. Either the field spec.securityContext.runAsNonRoot
+          must be set to `true`, or the fields spec.containers[*].securityContext.runAsNonRoot,
+          spec.initContainers[*].securityContext.runAsNonRoot, and spec.ephemeralContainers[*].securityContext.runAsNonRoot
+          must be set to `true`.
+        anyPattern:
+          - spec:
+              securityContext:
+                runAsNonRoot: "true"
+              =(ephemeralContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+              =(initContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+              containers:
+                - =(securityContext):
+                    =(runAsNonRoot): "true"
+          - spec:
+              =(ephemeralContainers):
+                - securityContext:
+                    runAsNonRoot: "true"
+              =(initContainers):
+                - securityContext:
+                    runAsNonRoot: "true"
+              containers:
+                - securityContext:
+                    runAsNonRoot: "true"
+{{- end }}
+{{- end }}

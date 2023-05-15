@@ -1,0 +1,59 @@
+{{- $name := "disallowProcMount" }}
+{{- $category := "podSecurityBaseline" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+{{- with $policyValues.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Disallow procMount
+    policies.kyverno.io/category: {{ $category }}
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    kyverno.io/kyverno-version: 1.6.0
+    kyverno.io/kubernetes-version: "1.22-1.23"
+    policies.kyverno.io/description: >-
+      The default /proc masks are set up to reduce attack surface and should be required. This policy
+      ensures nothing but the default procMount can be specified. Note that in order for users
+      to deviate from the `Default` procMount requires setting a feature gate at the API
+      server.
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: check-proc-mount
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: >-
+          Changing the proc mount from the default is not allowed. The fields
+          spec.containers[*].securityContext.procMount, spec.initContainers[*].securityContext.procMount,
+          and spec.ephemeralContainers[*].securityContext.procMount must be unset or
+          set to `Default`.
+        pattern:
+          spec:
+            =(ephemeralContainers):
+              - =(securityContext):
+                  =(procMount): "Default"
+            =(initContainers):
+              - =(securityContext):
+                  =(procMount): "Default"
+            containers:
+              - =(securityContext):
+                  =(procMount): "Default"
+{{- end }}
+{{- end }}

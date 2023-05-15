@@ -1,0 +1,175 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.badgesSection" . }}
+
+## Description
+Helm chart to deploy Kyverno policies.
+Policy categories:
+- **podSecurityBaseline** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline
+- **podSecurityRestricted** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+- **other**
+
+## Installation
+````shell
+helm repo add kyverno-policies https://lablabs.github.io/kyverno-policies/
+helm install kyverno-policies kyverno-policies/kyverno-policies
+````
+
+## How-to
+### Enable or disable policies
+#### Enable a policy
+````yaml
+policies:
+  myPolicy:
+    enabled: true
+````
+#### Enable a category
+````yaml
+# All policies within the category will be deployed
+policyCategories:
+  myCategory:
+    enabled: true
+````
+
+#### Disable a policy
+In case you want to deploy an entire category except for just a few policies, you can explicitly disable the unwanted
+policies by setting their `enabled` value to `false`.
+````yaml
+# Category myCategory is enabled
+policyCategories:
+  myCategory:
+    enabled: true
+
+# The policy myPolicy is part of myCategory. By setting enabled: false, it will not be deployed even if the category is enabled.
+policies:
+  myPolicy:
+    enabled: false
+````
+The following table shows the results of possible combinations for the `enabled` values on the policy(p) and category(c) level.
+`true` means policy will be deployed, `false` means policy will not be deployed. Policy value has precedence over category value.
+
+| enabled     | true(c) | false(c) | no value(c) |
+|-------------|---------|----------|-------------|
+| true(p)     | true    | true     | true        |
+| false(p)    | false   | false    | false       |
+| no value(p) | true    | false    | false       |
+
+### Set attributes
+#### Set `validationFailureAction for a policy
+````yaml
+policies:
+  myPolicy:
+    validationFailureAction: Enforce
+````
+#### Set validationFailureAction for a category
+````yaml
+policyCategories:
+  myCategory:
+    validationFailureAction: Enforce
+````
+#### Set exclude block for a policy
+````yaml
+# Excludes namespace kube-system from rule validation
+policies:
+  myPolicy:
+    exclude:
+      any:
+        - resources:
+            namespaces:
+              - kube-system
+````
+#### Override policy rules
+In case you want to override the entire `rules` block of a particular policy, set `.Values.policies.myPolicy.rulesOverride`.
+````yaml
+# Excludes namespace kube-system from rule validation
+policies:
+  myPolicy:
+    rulesOverride:
+      - name: my-rule
+        match: ...
+````
+
+### Value priority
+Most values are overridden in the following order of priority, from highest to lowest:
+1. Policy
+2. Category
+3. Chart
+#### Example
+````yaml
+# Chart setting
+validationFailureAction: Audit
+
+# Category setting
+# All policies within myCategory will have validationFailureAction set to Enforce
+policyCategories:
+  myCategory:
+    validationFailureAction: Enforce
+
+# Even if myPolicy is part of myCategory, validationFailureAction will be Audit
+policies:
+  myPolicy:
+    validationFailureAction: Audit
+````
+
+### Deploy custom policie
+If you have custom policie you would like to deploy as part of the Helm release, provide their manifests in `.Values.extraManifests`:
+````yaml
+extraManifests:
+  - apiVersion: kyverno.io/v1
+    kind: ClusterPolicy
+    metadata: # metadata
+    spec: # spec
+````
+
+## Adding a new policy
+1. Create your policy manifest. The policy should ideally be a ClusterPolicy
+2. Place the policy template in its appropriate category directory
+3. Override `$name` and `$category` variables. `$name` should match the file name, `category` should match the directory.
+````yaml
+{{`{{- $name := "myPolicy" }}`}}
+{{`{{- $category := "myCategory" }}`}}
+{{`{{- $policyValues := get .Values.policies $name }}`}}
+{{`{{- $categoryValues := get .Values.policyCategories $category }}`}}
+
+{{`{{- if include "kyverno-policies.enabled" (list $name $category $) }}`}}
+# The policy goes here
+{{`{{- end }}`}}
+````
+4. Provide useful [Kyverno annotations](https://github.com/kyverno/policies/wiki/Kyverno-annotations)
+5. [Policy settings](https://kyverno.io/docs/writing-policies/policy-settings/) are rendered via the kyverno-policies.policySettings template within _helpers.tpl. If your policy setting is not listed yet, add it there with appropriate overrides.
+6. Add the `rules` block
+````yaml
+  rules:
+{{`{{- if $policyValues.rulesOverride }}`}}
+{{`{{ toYaml $policyValues.rulesOverride | indent 4 }}`}}
+{{`{{- else }}`}}
+# Your rules go here
+{{`{{- end }}`}}
+````
+7. Allow override of the `exclude` block within your rules (if appropriate)
+````yaml
+{{`{{- if $policyValues.exclude }}`}}
+      exclude: {{`{{ toYaml $policyValues.exclude | nindent 8 }}`}}
+{{`{{- end }}`}}
+````
+8. Add your policy and/or category to values.yaml
+````yaml
+policyCategories:
+  myCategory: {}
+
+policies:
+  myPolicy: {}
+````
+9. Document your changes
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

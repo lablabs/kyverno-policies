@@ -1,0 +1,4 @@
+{{- range .Values.extraManifests }}
+---
+{{ include "kyverno-policies.extraManifests" (dict "value" . "context" $) }}
+{{- end }}
