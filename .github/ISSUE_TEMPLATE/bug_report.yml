@@ -57,7 +57,7 @@ body:
 - type: input
   attributes:
     label: Kubectl version
-    description: Paste the output of `helm version`
+    description: Paste the output of `kubectl version`
     render: console
     placeholder: |
       $ kubectl version
