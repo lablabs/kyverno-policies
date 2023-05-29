@@ -43,20 +43,22 @@ body:
   validations:
     required: true
 
-- type: input
+- type: textarea
   attributes:
     label: Helm version
     description: Paste the output of `helm version`
+    render: console
     placeholder: |
       $ helm version
       version.BuildInfo{Version:"v3.10.2", GitCommit:"50f003e5ee8704ec937a756c646870227d7c8b58", GitTreeState:"clean", GoVersion:"go1.18.8"}
   validations:
     required: true
 
-- type: input
+- type: textarea
   attributes:
     label: Kubectl version
     description: Paste the output of `kubectl version`
+    render: console
     placeholder: |
       $ kubectl version
       ...
