@@ -26,9 +26,11 @@ policyCategories:
 #    validationFailureAction: Audit   # Set validationFailureAction per category.
 #    failurePolicy: Fail              # Set failurePolicy per category.
 #    background: true                 # Set background per category.
+  bestPractices: {}
   podSecurityBaseline: {}
   podSecurityRestricted: {}
   other: {}
+  sample: {}
 
 # -- Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename.
 policies:

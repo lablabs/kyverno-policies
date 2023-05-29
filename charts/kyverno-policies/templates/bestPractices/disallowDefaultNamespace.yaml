@@ -1,5 +1,5 @@
 {{- $name := "disallowDefaultNamespace" }}
-{{- $category := "other" }}
+{{- $category := "bestPractices" }}
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
@@ -12,7 +12,7 @@ metadata:
     pod-policies.kyverno.io/autogen-controllers: none
     policies.kyverno.io/title: Disallow Default Namespace
     policies.kyverno.io/minversion: 1.6.0
-    policies.kyverno.io/category: {{ $category }}, Multi-Tenancy
+    policies.kyverno.io/category: {{ $category }}
     policies.kyverno.io/severity: medium
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-

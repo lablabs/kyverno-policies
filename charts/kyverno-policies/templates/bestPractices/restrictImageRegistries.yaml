@@ -1,0 +1,48 @@
+{{- $name := "restrictImageRegistries" }}
+{{- $category := "bestPractices" }}
+{{- $policyValues := get .Values.policies $name }}
+{{- $categoryValues := get .Values.policyCategories $category }}
+
+{{- if include "kyverno-policies.enabled" (list $name $category $) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ kebabcase $name }}
+  annotations:
+{{- with $policyValues.autogenControllers }}
+    pod-policies.kyverno.io/autogen-controllers: {{ . }}
+{{- end }}
+    policies.kyverno.io/title: Restrict Image Registries
+    policies.kyverno.io/category: {{ $category }}
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: 1.6.0
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Images from unknown, public registries can be of dubious quality and may not be
+      scanned and secured, representing a high degree of risk. Requiring use of known, approved
+      registries helps reduce threat exposure by ensuring image pulls only come from them.
+      Use of this policy requires customization to define your allowable registries.
+      To allow registries `eu.foo.io` and `bar.io`, set .allowedRegistries to regex pattern "eu.foo.io/* | bar.io/*"
+spec:
+{{ include "kyverno-policies.policySettings" (list $name $category $) }}
+  rules:
+{{- if $policyValues.rulesOverride }}
+{{ toYaml $policyValues.rulesOverride | indent 4 }}
+{{- else }}
+    - name: validate-registries
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+{{- if $policyValues.exclude }}
+      exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
+{{- end }}
+      validate:
+        message: "Unknown image registry."
+        pattern:
+          spec:
+            containers:
+              - image: {{ .allowedRegistries | default "?*" | quote }}
+{{- end }}
+{{- end }}

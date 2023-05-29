@@ -2,14 +2,16 @@
 
 Helm chart for deployment of Kyverno policies
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Description
 Helm chart to deploy Kyverno policies.
 Policy categories:
+- **bestPractices** - Policies which validate and enforce Kubernetes best practices
 - **podSecurityBaseline** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline
 - **podSecurityRestricted** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
-- **other**
+- **other** - All other policies, may be split into separate categories in the future
+- **sample** - Policies that showcase a certain Kyverno functionality
 
 ## Installation
 ````shell
@@ -174,7 +176,7 @@ policies:
 | fullnameOverride | string | `""` | fullnameOverride |
 | nameOverride | string | `""` | nameOverride |
 | policies | object | `{"blockStaleImages":{},"checkServiceAccount":{"background":false},"disableAutomountServiceAccountToken":{},"disablePodAutomountServiceAccountToken":{},"disableServiceDiscovery":{},"disallowAllSecrets":{},"disallowCapabilitiesStrict":{},"disallowDefaultNamespace":{},"disallowEmptyIngressHost":{},"disallowHostNamespaces":{},"disallowHostPath":{},"disallowHostPorts":{},"disallowPrivilegeEscalation":{},"disallowPrivilegedContainers":{},"disallowProcMount":{},"disallowSELinux":{},"preventNakedPods":{},"protectNodeTaints":{"background":false},"requireEncryptionAwsLoadBalancers":{},"requireLabels":{},"requireRoRootFs":{},"requireRunAsNonRoot":{},"requireRunAsNonRootUser":{},"restrictAppArmor":{},"restrictImageRegistries":{},"restrictIngressWildcard":{},"restrictNodePort":{},"restrictSeccompStrict":{},"restrictServiceExternalIps":{},"restrictSysctls":{},"restrictVolumeTypes":{}}` | Used to enable and override individual policies. Policy override takes precedence over category override. Policy name matches its filename. |
-| policyCategories | object | `{"other":{},"podSecurityBaseline":{},"podSecurityRestricted":{}}` | Used to enable policies in bulk per category. May override policy attributes for the entire category. |
+| policyCategories | object | `{"bestPractices":{},"other":{},"podSecurityBaseline":{},"podSecurityRestricted":{},"sample":{}}` | Used to enable policies in bulk per category. May override policy attributes for the entire category. |
 | validationFailureAction | string | `"Audit"` | Default validationFailureAction policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
 | validationFailureActionOverrides | list | `[]` | Default validationFailureActionOverrides policy setting according to https://kyverno.io/docs/writing-policies/policy-settings/ |
 
