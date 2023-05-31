@@ -1,7 +1,11 @@
 policyCategories:
+  bestPractices:
+    enabled: true
   podSecurityBaseline:
     enabled: true
   podSecurityRestricted:
     enabled: true
   other:
+    enabled: true
+  sample:
     enabled: true

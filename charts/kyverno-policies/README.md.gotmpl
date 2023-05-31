@@ -7,9 +7,11 @@
 ## Description
 Helm chart to deploy Kyverno policies.
 Policy categories:
+- **bestPractices** - Policies which validate and enforce Kubernetes best practices
 - **podSecurityBaseline** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline
 - **podSecurityRestricted** - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
-- **other**
+- **other** - All other policies, may be split into separate categories in the future
+- **sample** - Policies that showcase a certain Kyverno functionality
 
 ## Installation
 ````shell

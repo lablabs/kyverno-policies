@@ -1,5 +1,5 @@
-{{- $name := "disallowEmptyIngressHost" }}
-{{- $category := "other" }}
+{{- $name := "restrictServiceExternalIps" }}
+{{- $category := "bestPractices" }}
 {{- $policyValues := get .Values.policies $name }}
 {{- $categoryValues := get .Values.policyCategories $category }}
 
@@ -12,36 +12,38 @@ metadata:
 {{- with $policyValues.autogenControllers }}
     pod-policies.kyverno.io/autogen-controllers: {{ . }}
 {{- end }}
-    policies.kyverno.io/title: Disallow empty Ingress host
+    policies.kyverno.io/title: Restrict External IPs
     policies.kyverno.io/category: {{ $category }}
     policies.kyverno.io/minversion: 1.6.0
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/subject: Service
     policies.kyverno.io/description: >-
-      An ingress resource needs to define an actual host name
-      in order to be valid. This policy ensures that there is a
-      hostname for each rule defined.
+      Service externalIPs can be used for a MITM attack (CVE-2020-8554).
+      Restrict externalIPs or limit to a known set of addresses.
+      See: https://github.com/kyverno/kyverno/issues/1367. This policy validates
+      that the `externalIPs` field is not set on a Service.
 spec:
 {{ include "kyverno-policies.policySettings" (list $name $category $) }}
   rules:
 {{- if $policyValues.rulesOverride }}
 {{ toYaml $policyValues.rulesOverride | indent 4 }}
 {{- else }}
-    - name: disallow-empty-ingress-host
+    - name: check-ips
       match:
         any:
           - resources:
               kinds:
-                - Ingress
+                - Service
 {{- if $policyValues.exclude }}
       exclude: {{ toYaml $policyValues.exclude | nindent 8 }}
 {{- end }}
       validate:
-        message: "The Ingress host name must be defined, not empty."
-        deny:
-          conditions:
-            - key: "{{`{{`}} request.object.spec.rules[].host || `[]` | length(@) {{`}}`}}"
-              operator: NotEquals
-              value: "{{`{{`}} request.object.spec.rules[].http || `[]` | length(@) {{`}}`}}"
+        message: "externalIPs are not allowed."
+        pattern:
+          spec:
+            # restrict external IP addresses
+            # you can alternatively restrict to a known set of addresses using:
+            #     =(externalIPs): ["37.10.11.53", "153.10.20.1"]
+            X(externalIPs): "null"
 {{- end }}
 {{- end }}
