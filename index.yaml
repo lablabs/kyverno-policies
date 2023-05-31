@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   kyverno-policies:
   - apiVersion: v2
+    created: "2023-05-31T10:41:40.150622406Z"
+    description: Helm chart for deployment of Kyverno policies
+    digest: a228a1fef2682d3e15c8a05c036a0c9dc80526dc0f8cb63ee7a5da307f93631a
+    maintainers:
+    - email: contact@lablabs.io
+      name: Labyrinth Labs
+      url: https://lablabs.io
+    name: kyverno-policies
+    type: application
+    urls:
+    - https://github.com/lablabs/kyverno-policies/releases/download/kyverno-policies-0.2.0/kyverno-policies-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     created: "2023-05-15T07:30:01.259322906Z"
     description: Helm chart for deployment of Kyverno policies
     digest: 1c85f28b8b91fc8dae08ddb0b938fb3e1c4c6530fdd10b8850a8544b30418bad
@@ -14,4 +27,4 @@ entries:
     urls:
     - https://github.com/lablabs/kyverno-policies/releases/download/kyverno-policies-0.1.0/kyverno-policies-0.1.0.tgz
     version: 0.1.0
-generated: "2023-05-15T07:30:01.259334206Z"
+generated: "2023-05-31T10:41:40.150636807Z"
