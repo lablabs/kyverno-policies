@@ -79,7 +79,9 @@ Render default policy settings https://kyverno.io/docs/writing-policies/policy-s
 {{- $policyValues := get $.Values.policies $name }}
 {{- $categoryValues := get $.Values.policyCategories $category }}
   validationFailureAction: {{ coalesce $policyValues.validationFailureAction $categoryValues.validationFailureAction $.Values.validationFailureAction }}
-  validationFailureActionOverrides: {{ toYaml (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides $.Values.validationFailureActionOverrides) | nindent 4 }}
+{{- with (coalesce $policyValues.validationFailureActionOverrides $categoryValues.validationFailureActionOverrides $.Values.validationFailureActionOverrides) }}
+  validationFailureActionOverrides: {{ toYaml . | nindent 4 }}
+{{- end }}
 {{- if hasKey $policyValues "background" }}
   background: {{ $policyValues.background }}
 {{- else if hasKey $categoryValues "background" }}
